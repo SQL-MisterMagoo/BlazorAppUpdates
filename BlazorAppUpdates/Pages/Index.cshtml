@@ -4,4 +4,15 @@
 
 Welcome to your new app.
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+<div>This is Version 1.0 of your new app - change this, rebuild and then click the button.</div>
+
+
+<button class="btn btn-primary" onclick="@OnClick">Update This App</button>
+
+@functions
+{
+protected async Task OnClick()
+{
+    var result = await JSRuntime.Current.InvokeAsync<object>("blazorCache.updateClient", @"/_framework/_bin/BlazorAppUpdates.dll");
+}
+}
