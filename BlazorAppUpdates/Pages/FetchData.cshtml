@@ -1,33 +1,25 @@
 ﻿@page "/fetchdata"
 @inject HttpClient Http
 
-<h1>Weather forecast</h1>
-
-<p>This component demonstrates fetching data from the server.</p>
-
-@if (forecasts == null)
+<h1>Twitch Streams - Programming</h1>
+<button onclick="@Refresh" class="btn btn-primary">Refresh</button>
+@if (streams == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>You need to refresh by clicking the button above...</em></p>
 }
 else
 {
     <table class="table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
+                <th>Streamer / Title</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var forecast in forecasts)
+            @foreach (var stream in streams)
             {
                 <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
+                    <td><a href='@($"https://twitch.tv/{stream.user_name}")' target="_blank"><h4>@stream.user_name</h4> <em>@stream.title</em></a></td>
                 </tr>
             }
         </tbody>
@@ -35,18 +27,40 @@ else
 }
 
 @functions {
-    WeatherForecast[] forecasts;
+  Datum[] streams;
 
-    protected override async Task OnInitAsync()
-    {
-        forecasts = await Http.GetJsonAsync<WeatherForecast[]>("sample-data/weather.json");
-    }
+  async Task Refresh()
+  {
+      Http.DefaultRequestHeaders.Add("client-id", "");
+      var response = await Http.GetJsonAsync<TwitchStreams>("https://api.twitch.tv/helix/streams?game_id=509670&tag_id=a59f1e4e-257b-4bd0-90c7-189c3efbf917");
+      streams = response.data;
+  }
 
-    class WeatherForecast
-    {
-        public DateTime Date { get; set; }
-        public int TemperatureC { get; set; }
-        public int TemperatureF { get; set; }
-        public string Summary { get; set; }
-    }
+  public class TwitchStreams
+  {
+      public Datum[] data { get; set; }
+      public Pagination pagination { get; set; }
+  }
+
+  public class Pagination
+  {
+      public string cursor { get; set; }
+  }
+
+  public class Datum
+  {
+      public string id { get; set; }
+      public string user_id { get; set; }
+      public string user_name { get; set; }
+      public string game_id { get; set; }
+      public string[] community_ids { get; set; }
+      public string type { get; set; }
+      public string title { get; set; }
+      public int viewer_count { get; set; }
+      public DateTime started_at { get; set; }
+      public string language { get; set; }
+      public string thumbnail_url { get; set; }
+      public string[] tag_ids { get; set; }
+  }
+
 }

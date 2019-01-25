@@ -26,7 +26,7 @@
     '/blazorSWRegister.js'
 ];
 
-const staticCacheName = 'blazor-cache-v2';
+const staticCacheName = 'blazor-cache-v3';
 const expectedCaches = [
     staticCacheName
 ];
@@ -76,12 +76,16 @@ self.addEventListener('fetch', event => {
                         // TODO 5 - Respond with custom 404 page
 
                         if (response.ok) {
-                            const pathname = requestUrl.pathname;
-                            console.log("CACHE: Adding " + pathname);
-                            return caches.open(staticCacheName).then(cache => {
-                                cache.put(event.request.url, response.clone());
-                                return response;
-                            });
+                            if (requestUrl.origin === location.origin) {
+
+                                const pathname = requestUrl.pathname;
+                                console.log("CACHE: Adding " + pathname);
+                                return caches.open(staticCacheName).then(cache => {
+                                    cache.put(event.request.url, response.clone());
+                                    return response;
+                                });
+                            }
+                            return response;
                         }
                     });
             }).catch(error => {
